@@ -4,6 +4,7 @@ import java.util.Optional;
 
 public class Bord {
     private final ArrayList<Kaart> kaarten;
+    private final ArrayList<SpecialeKaart> specialeKaarten;
 
     public Bord() {
         kaarten = new ArrayList<>();
@@ -24,6 +25,9 @@ public class Bord {
         kaarten.add(new Kaart(100000, 15000, 15, Optional.empty()));
         kaarten.add(new Kaart(100000, 15000, 25, Optional.empty()));
         kaarten.add(new Kaart(100000, 15000, 35, Optional.empty()));
+        specialeKaarten = new ArrayList<>();
+        specialeKaarten.add(new SpecialeKaart(12, 150000, 4000, Optional.empty()));
+        specialeKaarten.add(new SpecialeKaart(28, 150000, 4000, Optional.empty()));
     }
 
     public Optional<Kaart> getKaart(int pos) {
@@ -35,37 +39,79 @@ public class Bord {
         return Optional.empty();
     }
 
-    public Kaart veranderBezet(Optional<Speler> speler, int pos) {
+    public Optional<SpecialeKaart> getSpecialeKaart(int pos) {
+        for (SpecialeKaart specialeKaart: specialeKaarten) {
+            if (specialeKaart.position() == pos) {
+                return Optional.of(specialeKaart);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public void koopSpeciaalBezit(Speler speler, int pos) {
+        for (int specialeKaart = 0; specialeKaart < specialeKaarten.size(); specialeKaart++) {
+            if (specialeKaarten.get(specialeKaart).position() == pos) {
+                specialeKaarten.set(specialeKaart, specialeKaarten.get(specialeKaart).setBezet(Optional.of(speler)));
+            }
+        }
+        speciaalPrijs();
+    }
+
+    public int verkoopSpeciaalBezit(int pos) {
+        for (int specialeKaart = 0; specialeKaart < specialeKaarten.size(); specialeKaart++) {
+            SpecialeKaart kaart = specialeKaarten.get(specialeKaart);
+            if (kaart.position() == pos) {
+                specialeKaarten.set(specialeKaart, kaart.setBezet(Optional.empty()));
+                speciaalPrijs();
+                return kaart.prijs();
+            }
+        }
+        return 0;
+    }
+
+    public void koopBezet(Speler speler, int pos) {
         for (int kaart = 0; kaart < kaarten.size(); kaart++) {
             if (kaarten.get(kaart).pos() == pos) {
                 if (kaart > kaarten.size()-4) {
-                    kaarten.set(kaart, kaarten.get(kaart).setBezet(speler));
-                    return kaarten.get(kaart);
+                    kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.of(speler)));
                 } else {
-                    return veranderBezetVervoer(speler, pos);
+                    koopBezetVervoer(speler, pos);
                 }
             }
         }
-        return new Kaart(0, 0, -1, Optional.empty());
     }
 
-    private Kaart veranderBezetVervoer(Optional<Speler> speler, int pos) {
-        if (speler.isPresent()) {
-            for (int kaart = kaarten.size() - 4; kaart < kaarten.size(); kaart++) {
-                if (kaarten.get(kaart).pos() == pos) {
-                    kaarten.set(kaart, kaarten.get(kaart).setBezet(speler));
-                }
-            }
-            treinPrijs(speler.get());
-        } else {
-            for (int kaart = kaarten.size() - 4; kaart < kaarten.size(); kaart++) {
-                if (kaarten.get(kaart).bezet().isPresent()) {
-                    treinPrijs(kaarten.get(kaart).bezet().get());
-                    return kaarten.get(kaart);
+    public int verkoopBezet(Speler speler, int pos) {
+        for (int kaart = 0; kaart < kaarten.size(); kaart++) {
+            if (kaarten.get(kaart).pos() == pos) {
+                if (kaart > kaarten.size()-4) {
+                    kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.empty()));
+                    return kaarten.get(kaart).prijs();
+                } else {
+                    return verkoopBezetVervoer(speler, pos);
                 }
             }
         }
-        return new Kaart(0, 0, -1, Optional.empty());
+        return 0;
+    }
+
+    private int verkoopBezetVervoer(Speler speler, int pos) {
+        for (int kaart = kaarten.size() - 4; kaart < kaarten.size(); kaart++) {
+            if (kaarten.get(kaart).pos() == pos) {
+                kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.empty()));
+            }
+        }
+        treinPrijs(speler);
+        return kaarten.get(kaarten.size()-1).prijs();
+    }
+
+    private void koopBezetVervoer(Speler speler, int pos) {
+        for (int kaart = kaarten.size() - 4; kaart < kaarten.size(); kaart++) {
+            if (kaarten.get(kaart).pos() == pos) {
+                kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.of(speler)));
+            }
+        }
+        treinPrijs(speler);
     }
 
     private int aantalVanSpeler(Speler speler) {
@@ -90,5 +136,29 @@ public class Bord {
                 }
             }
         }
+    }
+
+    private void speciaalPrijs() {
+        boolean allebij = allebij();
+        for (int kaartI = 0; kaartI < specialeKaarten.size(); kaartI++) {
+            SpecialeKaart specialeKaart = specialeKaarten.get(kaartI);
+            if (specialeKaart.bezitter().isPresent()) {
+                specialeKaarten.set(kaartI, specialeKaart.setMaal(allebij ? 10000: 4000));
+            } else {
+                specialeKaarten.set(kaartI, specialeKaart.setMaal(4000));
+            }
+        }
+    }
+
+    private boolean allebij() {
+        return (specialeKaarten.get(0).bezitter() == specialeKaarten.get(1).bezitter());
+    }
+
+    public int betalen(int pos) {
+        if (pos == 4)
+            return 200000;
+        if (pos == 38)
+            return 100000;
+        return 0;
     }
 }

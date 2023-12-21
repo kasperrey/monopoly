@@ -8,6 +8,6 @@ public class Dobbelsteen {
     }
 
     public int dobbelen() {
-        return random.nextInt(6) + 1;
+        return random.nextInt(12) + 1;
     }
 }

@@ -16,19 +16,46 @@ public class Speler {
 
     public void stap(int stappen, boolean kopen) {
         pos = overLijn(pos + stappen);
+        geld -= bord.betalen(pos);
+        kaart(kopen);
+        specialeKaart(stappen, kopen);
+    }
+
+    private void specialeKaart(int stappen, boolean kopen) {
+        Optional<SpecialeKaart> specialeKaartOptional = bord.getSpecialeKaart(pos);
+        if (specialeKaartOptional.isPresent()) {
+            SpecialeKaart specialeKaart = specialeKaartOptional.get();
+            if (specialeKaart.bezitter().isPresent()) {
+                int prijs = specialeKaart.maal() * stappen;
+                while (geld < (prijs)) {
+                    int p = bord.verkoopSpeciaalBezit(pos);
+                    geld += (p - p / 7);
+                }
+                specialeKaart.bezitter().get().addGeld(prijs);
+                geld -= prijs;
+            } else {
+                if (geld >= specialeKaart.prijs() && kopen) {
+                    bord.koopSpeciaalBezit(this, pos);
+                    geld -= specialeKaart.prijs();
+                }
+            }
+        }
+    }
+
+    private void kaart(boolean kopen) {
         Optional<Kaart> kaart = bord.getKaart(pos);
         if (kaart.isPresent()) {
             Kaart echteKaart = kaart.get();
             if (echteKaart.bezet().isPresent()) {
                 while (geld < echteKaart.huur()) {
-                    Kaart k = bord.veranderBezet(Optional.empty(), pos);
-                    geld += (k.prijs()-k.prijs()/7);
+                    int p = bord.verkoopBezet(this, pos);
+                    geld += (p-p/7);
                 }
                 echteKaart.bezet().get().addGeld(echteKaart.huur());
                 geld -= echteKaart.huur();
             } else {
                 if (geld >= echteKaart.prijs() && kopen) {
-                    bord.veranderBezet(Optional.of(this), pos);
+                    bord.koopBezet(this, pos);
                     geld -= echteKaart.prijs();
                 }
             }
