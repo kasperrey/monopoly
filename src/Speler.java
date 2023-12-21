@@ -14,7 +14,7 @@ public class Speler {
         this.geld += geld;
     }
 
-    public void stap(int stappen) {
+    public void stap(int stappen, boolean kopen) {
         pos = overLijn(pos + stappen);
         Optional<Kaart> kaart = bord.getKaart(pos);
         if (kaart.isPresent()) {
@@ -27,7 +27,7 @@ public class Speler {
                 echteKaart.bezet().get().addGeld(echteKaart.huur());
                 geld -= echteKaart.huur();
             } else {
-                if (geld >= echteKaart.prijs()) {
+                if (geld >= echteKaart.prijs() && kopen) {
                     bord.veranderBezet(Optional.of(this), pos);
                     geld -= echteKaart.prijs();
                 }
@@ -41,5 +41,9 @@ public class Speler {
             return pos - 40;
         }
         return pos;
+    }
+
+    public boolean verloren() {
+        return (geld < 0);
     }
 }
