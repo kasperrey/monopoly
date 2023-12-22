@@ -22,7 +22,7 @@ public class Main {
         System.out.println(verloren1);
         System.out.print("speler2 is verloren is ");
         System.out.println(verloren2);
-        System.out.print("speler2 is verloren is ");
+        System.out.print("speler3 is verloren is ");
         System.out.println(verloren3);
     }
 }

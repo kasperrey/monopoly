@@ -16,7 +16,16 @@ public class Speler {
 
     public void stap(int stappen, boolean kopen) {
         pos = overLijn(pos + stappen);
-        geld -= bord.betalen(pos);
+        int betalen = bord.betalen(pos);
+        while (geld < betalen) {
+            int p = bord.verkoopBezit(this);
+            if (p == 0) {
+                System.out.println("betalen");
+                break;
+            }
+            geld += (p-p/7);
+        }
+        geld -= betalen;
         kaart(kopen);
         specialeKaart(stappen, kopen);
     }
@@ -28,7 +37,9 @@ public class Speler {
             if (specialeKaart.bezitter().isPresent()) {
                 int prijs = specialeKaart.maal() * stappen;
                 while (geld < (prijs)) {
-                    int p = bord.verkoopSpeciaalBezit(pos);
+                    int p = bord.verkoopBezit(this);
+                    if (p == 0)
+                        break;
                     geld += (p - p / 7);
                 }
                 specialeKaart.bezitter().get().addGeld(prijs);
@@ -46,12 +57,14 @@ public class Speler {
         Optional<Kaart> kaart = bord.getKaart(pos);
         if (kaart.isPresent()) {
             Kaart echteKaart = kaart.get();
-            if (echteKaart.bezet().isPresent()) {
+            if (echteKaart.bezitter().isPresent()) {
                 while (geld < echteKaart.huur()) {
-                    int p = bord.verkoopBezet(this, pos);
+                    int p = bord.verkoopBezit(this);
+                    if (p == 0)
+                        break;
                     geld += (p-p/7);
                 }
-                echteKaart.bezet().get().addGeld(echteKaart.huur());
+                echteKaart.bezitter().get().addGeld(echteKaart.huur());
                 geld -= echteKaart.huur();
             } else {
                 if (geld >= echteKaart.prijs() && kopen) {
