@@ -5,7 +5,7 @@ public class Speler {
     private int geld;
     private int pos = 0;
 
-    public Speler(int geld, Bord bord) {
+    Speler(int geld, Bord bord) {
         this.geld = geld;
         this.bord = bord;
     }
@@ -17,16 +17,10 @@ public class Speler {
     public void stap(int stappen, boolean kopen) {
         pos = overLijn(pos + stappen);
         int betalen = bord.betalen(pos);
-        while (geld < betalen) {
-            int p = bord.verkoopBezit(this);
-            if (p == 0) {
-                System.out.println("betalen");
-                break;
-            }
-            geld += (p-p/7);
-        }
+        verkopen(betalen);
         geld -= betalen;
         kaart(kopen);
+        treinKaart(kopen);
         specialeKaart(stappen, kopen);
     }
 
@@ -36,12 +30,7 @@ public class Speler {
             SpecialeKaart specialeKaart = specialeKaartOptional.get();
             if (specialeKaart.bezitter().isPresent()) {
                 int prijs = specialeKaart.maal() * stappen;
-                while (geld < (prijs)) {
-                    int p = bord.verkoopBezit(this);
-                    if (p == 0)
-                        break;
-                    geld += (p - p / 7);
-                }
+               verkopen(prijs);
                 specialeKaart.bezitter().get().addGeld(prijs);
                 geld -= prijs;
             } else {
@@ -53,17 +42,39 @@ public class Speler {
         }
     }
 
+    private void treinKaart(boolean kopen) {
+        Optional<TreinKaart> treinKaartOptional = bord.getTreinKaart(pos);
+        if (treinKaartOptional.isPresent()) {
+            TreinKaart treinKaart = treinKaartOptional.get();
+            if (treinKaart.bezitter().isPresent()) {
+                int prijs = treinKaart.huur();
+                verkopen(prijs);
+                treinKaart.bezitter().get().addGeld(prijs);
+                geld -= prijs;
+            } else {
+                if (geld >= treinKaart.prijs() && kopen) {
+                    bord.koopTreinBezit(this, pos);
+                    geld -= treinKaart.prijs();
+                }
+            }
+        }
+    }
+
+    private void verkopen(int prijs) {
+        while (geld < (prijs)) {
+            int p = bord.verkoopBezit(this);
+            if (p == 0)
+                break;
+            geld += (p - p / 7);
+        }
+    }
+
     private void kaart(boolean kopen) {
         Optional<Kaart> kaart = bord.getKaart(pos);
         if (kaart.isPresent()) {
             Kaart echteKaart = kaart.get();
             if (echteKaart.bezitter().isPresent()) {
-                while (geld < echteKaart.huur()) {
-                    int p = bord.verkoopBezit(this);
-                    if (p == 0)
-                        break;
-                    geld += (p-p/7);
-                }
+                verkopen(echteKaart.huur());
                 echteKaart.bezitter().get().addGeld(echteKaart.huur());
                 geld -= echteKaart.huur();
             } else {

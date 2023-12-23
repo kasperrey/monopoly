@@ -3,7 +3,7 @@ import java.util.Random;
 public class Dobbelsteen {
     private final Random random;
 
-    public Dobbelsteen() {
+    Dobbelsteen() {
         this.random = new Random();
     }
 
