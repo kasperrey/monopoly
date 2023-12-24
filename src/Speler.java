@@ -65,7 +65,7 @@ public class Speler {
             int p = bord.verkoopBezit(this);
             if (p == 0)
                 break;
-            geld += (p - p / 7);
+            geld += p/2;
         }
     }
 
@@ -88,7 +88,7 @@ public class Speler {
 
     private int overLijn(int pos) {
         if (pos >= 40) {
-            geld += 200000;
+            geld += 200;
             return pos - 40;
         }
         return pos;

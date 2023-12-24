@@ -2,9 +2,9 @@ import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
-        Speler speler = new Speler(1000000, new Bord());
-        Speler speler2 = new Speler(1000000, new Bord());
-        Speler speler3 = new Speler(1000000, new Bord());
+        Speler speler = new Speler(1500, new Bord());
+        Speler speler2 = new Speler(1500, new Bord());
+        Speler speler3 = new Speler(1500, new Bord());
         Dobbelsteen dobbelsteen = new Dobbelsteen();
         Random random = new Random();
         boolean verloren1 = false;

@@ -12,10 +12,10 @@ public class Bord {
     Bord() {
         String map = "bord data/";
         try {
-            kaarten = LoaderCsv.leesKaart(map);
-            specialeKaarten = LoaderCsv.leesSpeciaal(map);
-            treinKaarten = LoaderCsv.leesTrein(map);
-            taxen = LoaderCsv.leesTax(map);
+            kaarten = LoaderJson.leesKaarten(map);
+            specialeKaarten = LoaderJson.leesSpecialeKaarten(map);
+            treinKaarten = LoaderJson.leesTreinKaarten(map);
+            taxen = LoaderJson.leesTax(map);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -95,6 +95,7 @@ public class Bord {
                 kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.of(speler)));
             }
         }
+        kaartPrijs(speler);
     }
 
     public int verkoopBezet(Speler speler) {
@@ -104,6 +105,7 @@ public class Bord {
                 return kaarten.get(kaart).prijs();
             }
         }
+        kaartPrijs(speler);
         return 0;
     }
 
@@ -135,6 +137,23 @@ public class Bord {
                 specialeKaarten.set(kaartI, specialeKaart.setMaal(allebij ? specialeKaart.malers()[1]: specialeKaart.malers()[0]));
             } else {
                 specialeKaarten.set(kaartI, specialeKaart.setMaal(specialeKaart.malers()[0]));
+            }
+        }
+    }
+
+    private void kaartPrijs(Speler speler) {
+        for (int kaartI = 0; kaartI < kaarten.size(); kaartI++) {
+            Kaart kaart = kaarten.get(kaartI);
+            if (kaart.bezitter().equals(Optional.of(speler))) {
+                if (heeftSpelerStraat(speler, kaart.kleur())) {
+                    if (kaart.huisjes() == 0) {
+                        kaarten.set(kaartI, kaart.setHuur(kaart.huures()[0] * 2));
+                    } else {
+                        kaarten.set(kaartI, kaart.setHuur(kaart.huures()[kaart.huisjes()]));
+                    }
+                } else {
+                    kaarten.set(kaartI, kaart.setHuur(kaart.huures()[0]));
+                }
             }
         }
     }
@@ -191,5 +210,21 @@ public class Bord {
             return verkoopSpeciaalBezit(speler);
         }
         return 0;
+    }
+
+    public boolean heeftSpelerStraat(Speler speler, String kleur) {
+        int aantalVanKleur = 0;
+        int aantalVanSpeler = 0;
+        for (Kaart kaart: kaarten) {
+            if (kaart.kleur().equals(kleur)) {
+                aantalVanKleur += 1;
+                if (kaart.bezitter().equals(Optional.of(speler))) {
+                    aantalVanSpeler += 1;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return aantalVanKleur == aantalVanSpeler;
     }
 }
