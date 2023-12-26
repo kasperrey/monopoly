@@ -1,3 +1,5 @@
+package be.kasperreynders.monopoly;
+
 import java.util.Optional;
 
 public record TreinKaart(int prijs, int huur, int pos, Optional<Speler> bezitter, int[] huures) {

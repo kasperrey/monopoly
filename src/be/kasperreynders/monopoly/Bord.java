@@ -1,6 +1,7 @@
+package be.kasperreynders.monopoly;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Bord {
@@ -8,8 +9,9 @@ public class Bord {
     private final ArrayList<SpecialeKaart> specialeKaarten;
     private final ArrayList<TreinKaart> treinKaarten;
     private final ArrayList<Tax> taxen;
+    private final ArrayList<Speler> spelers = new ArrayList<>();
 
-    Bord() {
+    public Bord() {
         String map = "bord data/";
         try {
             kaarten = LoaderJson.leesKaarten(map);
@@ -19,6 +21,14 @@ public class Bord {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void addSpeler(Speler speler) {
+        spelers.add(speler);
+    }
+
+    public ArrayList<Speler> getSpelers() {
+        return spelers;
     }
 
     public Optional<Kaart> getKaart(int pos) {
@@ -60,7 +70,7 @@ public class Bord {
     public int verkoopSpeciaalBezit(Speler speler) {
         for (int specialeKaart = 0; specialeKaart < specialeKaarten.size(); specialeKaart++) {
             SpecialeKaart kaart = specialeKaarten.get(specialeKaart);
-            if (Objects.equals(kaart.bezitter(), Optional.of(speler))) {
+            if (kaart.bezitter().equals(Optional.of(speler))) {
                 specialeKaarten.set(specialeKaart, kaart.setBezet(Optional.empty()));
                 speciaalPrijs();
                 return kaart.prijs();
@@ -80,7 +90,7 @@ public class Bord {
 
     public int verkoopTreinBezit(Speler speler) {
         for (int treinKaart = 0; treinKaart < treinKaarten.size(); treinKaart++) {
-            if (Objects.equals(treinKaarten.get(treinKaart).bezitter(), Optional.of(speler))) {
+            if (treinKaarten.get(treinKaart).bezitter().equals(Optional.of(speler))) {
                 kaarten.set(treinKaart, kaarten.get(treinKaart).setBezet(Optional.empty()));
                 return kaarten.get(treinKaart).prijs();
             }
@@ -100,7 +110,7 @@ public class Bord {
 
     public int verkoopBezet(Speler speler) {
         for (int kaart = 0; kaart < kaarten.size(); kaart++) {
-            if (Objects.equals(kaarten.get(kaart).bezitter(), Optional.of(speler))) {
+            if (kaarten.get(kaart).bezitter().equals(Optional.of(speler))) {
                 kaarten.set(kaart, kaarten.get(kaart).setBezet(Optional.empty()));
                 return kaarten.get(kaart).prijs();
             }
@@ -112,7 +122,7 @@ public class Bord {
     private int aantalVanSpeler(Speler speler) {
         int aantal = 0;
         for (TreinKaart treinKaart: treinKaarten) {
-            if (Objects.equals(treinKaart.bezitter(), Optional.of(speler))) {
+            if (treinKaart.bezitter().equals(Optional.of(speler))) {
                 aantal++;
             }
         }
@@ -123,7 +133,7 @@ public class Bord {
         int aantal = aantalVanSpeler(speler);
         for (int kaartI = 0; kaartI < treinKaarten.size(); kaartI++) {
             TreinKaart treinKaart = treinKaarten.get(kaartI);
-            if (Objects.equals(treinKaart.bezitter(), Optional.of(speler))) {
+            if (treinKaart.bezitter().equals(Optional.of(speler))) {
                 treinKaarten.set(kaartI, treinKaart.setHuur(treinKaart.huures()[aantal]));
             }
         }
@@ -161,7 +171,7 @@ public class Bord {
     public ArrayList<Kaart> getKaartenBySpeler(Speler speler) {
         ArrayList<Kaart> kaartenVanSpeler = new ArrayList<>();
         for (Kaart kaart: kaarten) {
-            if (Objects.equals(kaart.bezitter(), Optional.of(speler))) {
+            if (kaart.bezitter().equals(Optional.of(speler))) {
                 kaartenVanSpeler.add(kaart);
             }
         }
@@ -171,7 +181,7 @@ public class Bord {
     public ArrayList<TreinKaart> getTreinKaartenBySpeler(Speler speler) {
         ArrayList<TreinKaart> kaartenVanSpeler = new ArrayList<>();
         for (TreinKaart treinKaart: treinKaarten) {
-            if (Objects.equals(treinKaart.bezitter(), Optional.of(speler))) {
+            if (treinKaart.bezitter().equals(Optional.of(speler))) {
                 kaartenVanSpeler.add(treinKaart);
             }
         }
@@ -181,7 +191,7 @@ public class Bord {
     public ArrayList<SpecialeKaart> getSpecialeKaartenBySpeler(Speler speler) {
         ArrayList<SpecialeKaart> specialeKaartenVanSpeler = new ArrayList<>();
         for (SpecialeKaart specialeKaart: specialeKaarten) {
-            if (Objects.equals(specialeKaart.bezitter(), Optional.of(speler))) {
+            if (specialeKaart.bezitter().equals(Optional.of(speler))) {
                 specialeKaartenVanSpeler.add(specialeKaart);
             }
         }
@@ -202,11 +212,17 @@ public class Bord {
     }
 
     public int verkoopBezit(Speler speler) {
-        if (!getKaartenBySpeler(speler).isEmpty()) {
+        if (!getKaartenMetHuisjesBySpeler(speler).isEmpty()) {
+            kaartPrijs(speler);
+            return verkoopHuisje(speler);
+        } else if (!getKaartenBySpeler(speler).isEmpty()) {
+            kaartPrijs(speler);
             return verkoopBezet(speler);
         } else if (!getTreinKaartenBySpeler(speler).isEmpty()) {
+            treinPrijs(speler);
             return verkoopTreinBezit(speler);
         } else if (!getSpecialeKaartenBySpeler(speler).isEmpty()) {
+            speciaalPrijs();
             return verkoopSpeciaalBezit(speler);
         }
         return 0;
@@ -226,5 +242,51 @@ public class Bord {
             }
         }
         return aantalVanKleur == aantalVanSpeler;
+    }
+
+    public int koopHuisje(Speler speler, int geld) {
+        ArrayList<Kaart> kaartenBySpeler = getKaartenBySpeler(speler);
+        for (Kaart kaart : kaartenBySpeler) {
+            if (kaart.bezitter().equals(Optional.of(speler))) {
+                if (heeftSpelerStraat(speler, kaart.kleur())) {
+                    if (kaart.bouwPrijs() <= geld) {
+                        if (kaart.huisjes() < 5) {
+                            for (int i = 0; i < kaarten.size(); i++) {
+                                if (kaarten.get(i).equals(kaart)) {
+                                    kaarten.set(i, kaart.setHuisjes(kaart.huisjes()+1));
+                                    return kaart.bouwPrijs();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    private ArrayList<Kaart> getKaartenMetHuisjesBySpeler(Speler speler) {
+        ArrayList<Kaart> kaartenMetHuis = new ArrayList<>();
+        for (Kaart kaart: kaarten) {
+            if (kaart.bezitter().equals(Optional.of(speler))) {
+                if (kaart.huisjes() > 0) {
+                    kaartenMetHuis.add(kaart);
+                }
+            }
+        }
+        return kaartenMetHuis;
+    }
+
+    private int verkoopHuisje(Speler speler) {
+        for (int i = 0; i < kaarten.size(); i++) {
+            Kaart kaart = kaarten.get(i);
+            if (kaart.bezitter().equals(Optional.of(speler))) {
+                if (kaart.huisjes() > 0) {
+                    kaarten.set(i, kaart.setHuisjes(kaart.huisjes()-1));
+                    return kaart.bouwPrijs();
+                }
+            }
+        }
+        return 0;
     }
 }

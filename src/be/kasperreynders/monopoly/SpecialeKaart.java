@@ -1,3 +1,5 @@
+package be.kasperreynders.monopoly;
+
 import java.util.Optional;
 
 public record SpecialeKaart(int pos, int prijs, int maal, Optional<Speler> bezitter, int[] malers) {

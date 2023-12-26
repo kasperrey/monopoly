@@ -1,3 +1,5 @@
+package be.kasperreynders.monopoly;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,7 +25,7 @@ public class LoaderJson {
             int[] huures = {jsonObject.getInt("huur"), jsonObject.getInt("huurBouw1"), jsonObject.getInt("huurBouw2"),
                     jsonObject.getInt("huurBouw3"), jsonObject.getInt("huurBouw4"), jsonObject.getInt("huurBouw5")};
             kaarten.add(new Kaart(jsonObject.getInt("prijs"), jsonObject.getInt("huur"), jsonObject.getInt("positie"),
-                    Optional.empty(), huures, jsonObject.getString("kleur"), 0));
+                    Optional.empty(), huures, jsonObject.getString("kleur"), 0, jsonObject.getInt("bouwPrijs")));
         }
         return kaarten;
     }
