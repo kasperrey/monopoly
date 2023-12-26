@@ -1,5 +1,7 @@
 package be.kasperreynders.monopoly;
 
+import be.kasperreynders.monopoly.kans.KansKaarten;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -10,14 +12,17 @@ public class Bord {
     private final ArrayList<TreinKaart> treinKaarten;
     private final ArrayList<Tax> taxen;
     private final ArrayList<Speler> spelers = new ArrayList<>();
+    private final KansKaarten kansKaarten = new KansKaarten(this);
+    private final ArrayList<Integer> posKans;
 
     public Bord() {
-        String map = "bord data/";
+        String map = "bord data/bord/";
         try {
             kaarten = LoaderJson.leesKaarten(map);
             specialeKaarten = LoaderJson.leesSpecialeKaarten(map);
             treinKaarten = LoaderJson.leesTreinKaarten(map);
             taxen = LoaderJson.leesTax(map);
+            posKans = LoaderJson.getKansPos(map);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,8 +96,8 @@ public class Bord {
     public int verkoopTreinBezit(Speler speler) {
         for (int treinKaart = 0; treinKaart < treinKaarten.size(); treinKaart++) {
             if (treinKaarten.get(treinKaart).bezitter().equals(Optional.of(speler))) {
-                kaarten.set(treinKaart, kaarten.get(treinKaart).setBezet(Optional.empty()));
-                return kaarten.get(treinKaart).prijs();
+                treinKaarten.set(treinKaart, treinKaarten.get(treinKaart).setBezet(Optional.empty()));
+                return treinKaarten.get(treinKaart).prijs();
             }
         }
         treinPrijs(speler);
@@ -288,5 +293,11 @@ public class Bord {
             }
         }
         return 0;
+    }
+
+    public void kans(Speler speler) {
+        if (posKans.contains(speler.getPos())) {
+            kansKaarten.getRandomKansKaart().voerUit(speler);
+        }
     }
 }

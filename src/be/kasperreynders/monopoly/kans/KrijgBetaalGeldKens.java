@@ -24,6 +24,7 @@ public class KrijgBetaalGeldKens implements KansKaart {
             case "betaalBank" -> speler.betaalGeld(geld);
             case "krijgSpelers" -> krijgVanElkeSpeler(speler);
             case "betaalSpelers" -> betaalAanElkeSpeler(speler);
+            case "betaalHuis" -> betaalVoorHuis(speler);
         }
     }
 

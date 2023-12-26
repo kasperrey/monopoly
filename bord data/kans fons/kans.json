@@ -1,0 +1,20 @@
+{"ga naar": [
+    {"plekken": [0], "type": "go", "terug": 0},
+    {"plekken": [24], "type": "kaart", "terug": 0},
+    {"plekken": [11], "type": "kaart", "terug": 0},
+    {"plekken": [12, 28], "type": "speciaal", "terug": 0},
+    {"plekken": [5, 15, 25, 35], "type": "treinDicht", "terug": 0},
+    {"plekken": [5], "type": "trein", "terug": 0},
+    {"plekken": [39], "type": "kaart", "terug": 0}
+  ],
+"gevangenis": [
+    {"type": "uit"},
+    {"type": "in"}
+  ],
+"geld": [
+    {"type": "krijgenBank", "geld": 50},
+    {"type": "betaalHuis", "geld": 25},
+    {"type": "betaalBank", "geld": 15},
+    {"type": "betaalSpelers", "geld": 50},
+    {"type": "krijgenBank", "geld": 150}
+  ]}

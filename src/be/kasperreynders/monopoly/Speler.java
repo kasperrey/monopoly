@@ -19,6 +19,7 @@ public class Speler {
     }
 
     public void stap(int[] stappen, boolean kopen, int huisjes, boolean vrijkopen) {
+        bord.kans(this);
         int totaalStappen = stappen[0]+stappen[1];
         if (pos + totaalStappen == 30) {
             gevangen();

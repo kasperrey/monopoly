@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class GaNaarKans implements KansKaart {
-    private final int[] plekken;
+    private final ArrayList<Integer> plekken;
     private final String type;
     private final Bord bord;
     private final Dobbelsteen dobbelsteen;
     private final int terug;
 
-    public GaNaarKans(int[] plekken, String type, Bord bord, Dobbelsteen dobbelsteen, int terug) {
+    public GaNaarKans(ArrayList<Integer> plekken, String type, Bord bord, Dobbelsteen dobbelsteen, int terug) {
         this.plekken = plekken;
         this.type = type;
         this.bord = bord;
@@ -22,10 +22,13 @@ public class GaNaarKans implements KansKaart {
 
     @Override
     public void voerUit(Speler speler) {
+        System.out.println(plekken);
         if (!type.equals("terug")) {
             int dicht = dichtsBij(speler.getPos());
+            if ((dicht-speler.getPos()) < 0) {
+                speler.addGeld(200);
+            }
             speler.setPos(dicht);
-            speler.overLijn(speler.getPos());
             switch (type) {
                 case "treinDicht" -> treinDichtKaart(dicht, speler);
                 case "speciaal" -> specialeKaart(dicht, speler);
@@ -42,7 +45,7 @@ public class GaNaarKans implements KansKaart {
     }
 
     private int dichtsBij(int pos) {
-        int dichts = plekken[0];
+        int dichts = plekken.get(0);
         for (int p: plekken) {
             if (Math.abs(p-pos) < Math.abs(dichts-pos)) {
                 dichts = p;
